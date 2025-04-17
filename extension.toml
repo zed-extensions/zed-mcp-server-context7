@@ -1,0 +1,10 @@
+id = "mcp-server-context7"
+name = "Context7 MCP Server"
+description = "Model Context Protocol Server for Context7"
+version = "0.0.1"
+schema_version = 1
+authors = ["Akbxr <hi@akbxr.com>"]
+repository = "https://github.com/akbxr/zed-mcp-server-context7"
+
+[context_servers.mcp-server-context7]
+name = "Context7 MCP Server"
