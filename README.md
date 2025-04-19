@@ -33,9 +33,9 @@ How do I protect a route with NextAuth? use context7
 
 ## How It Works
 
-1️⃣ Ask your question naturally
-2️⃣ Tell the LLM to `use context7`
-3️⃣ Get working code answers
+- 1️⃣ Ask your question naturally
+- 2️⃣ Tell the LLM to `use context7`
+- 3️⃣ Get working code answers
 
 No tab-switching, no hallucinated APIs that don't exist, no outdated code generations.
 
