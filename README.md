@@ -48,6 +48,14 @@ No tab-switching, no hallucinated APIs that don't exist, no outdated code genera
 
 This extension can be installed from the Zed extension.
 
+## Agent Mode Configuration
+
+If you're using Zed's agent mode, you need to enable this context server for your assistant:
+
+1. Open Zed's assistant settings
+2. Enable the Context7 MCP server. If you see that the status of the tool is a red dot, make sure you toggle it so that becomes green.
+3. Enable the Context7 MCP Server in the active assistant profile. In the chat section, click on the `Write | Ask` button, then click on `tools`, then enable the Context7 MCP Server.
+
 ## Available Tools
 
 The Context7 MCP Server provides these tools to the LLM:
