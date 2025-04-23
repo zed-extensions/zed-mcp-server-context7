@@ -39,11 +39,6 @@ How do I protect a route with NextAuth? use context7
 
 No tab-switching, no hallucinated APIs that don't exist, no outdated code generations.
 
-## Requirements
-
-- Zed Editor
-- Node.js >= v18.0.0 (for development)
-
 ## Installation
 
 This extension can be installed from the Zed extension.
