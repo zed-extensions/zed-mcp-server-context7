@@ -1,7 +1,10 @@
+use schemars::JsonSchema;
 use serde::Deserialize;
 use std::env;
 use zed::settings::ContextServerSettings;
-use zed_extension_api::{self as zed, serde_json, Command, ContextServerId, Project, Result};
+use zed_extension_api::{
+    self as zed, serde_json, Command, ContextServerConfiguration, ContextServerId, Project, Result,
+};
 
 const PACKAGE_NAME: &str = "@upstash/context7-mcp";
 const PACKAGE_VERSION: &str = "latest";
@@ -10,7 +13,7 @@ const DEFAULT_MIN_TOKENS_ENV: &str = "DEFAULT_MINIMUM_TOKENS";
 
 struct Context7ModelContextExtension;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, JsonSchema)]
 struct Context7ModelContextExtensionSettings {
     #[serde(default)]
     default_minimum_tokens: Option<String>,
@@ -60,6 +63,48 @@ impl zed::Extension for Context7ModelContextExtension {
                 .to_string()],
             env: env_vars,
         })
+    }
+
+    fn context_server_configuration(
+        &mut self,
+
+        _context_server_id: &ContextServerId,
+
+        project: &Project,
+    ) -> Result<Option<ContextServerConfiguration>> {
+        let installation_instructions =
+            include_str!("../configuration/installation_instructions.md").to_string();
+
+        let settings = ContextServerSettings::for_project("mcp-server-context7", project);
+
+        let mut default_settings =
+            include_str!("../configuration/default_settings.jsonc").to_string();
+
+        if let Ok(user_settings) = settings {
+            if let Some(settings_value) = user_settings.settings {
+                if let Ok(context7_settings) =
+                    serde_json::from_value::<Context7ModelContextExtensionSettings>(settings_value)
+                {
+                    if let Some(default_minimum_tokens) = context7_settings.default_minimum_tokens {
+                        default_settings = default_settings
+                            .replace("\"10000\"", &format!("\"{}\"", default_minimum_tokens));
+                    }
+                }
+            }
+        }
+
+        let settings_schema = serde_json::to_string(&schemars::schema_for!(
+            Context7ModelContextExtensionSettings
+        ))
+        .map_err(|e| e.to_string())?;
+
+        Ok(Some(ContextServerConfiguration {
+            installation_instructions,
+
+            default_settings,
+
+            settings_schema,
+        }))
     }
 }
 
