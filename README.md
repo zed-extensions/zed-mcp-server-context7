@@ -61,6 +61,8 @@ Examples:
 {
   "context_server": {
     "mcp-server-context7": {
+      "source": "extension",
+      "enabled": true,
       "settings": {
         "default_minimum_tokens": "10000"
       }
