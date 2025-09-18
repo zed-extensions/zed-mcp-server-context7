@@ -1,3 +1,3 @@
-Optional settings
+Add Context7 API KEY (optional):
 
-default_minimum_tokens: Set the minimum token count for documentation retrieval (default: 10000).
+1. Go to your [Context7 dashboard](https://context7.com/dashboard) and generate an API key.

@@ -1,3 +1,4 @@
+// Your context7 api key (optional)
 {
-  "default_minimum_tokens": "10000"
+  "context7_api_key": "YOUR_CONTEXT7_API_KEY"
 }

@@ -9,15 +9,14 @@ use zed_extension_api::{
 const PACKAGE_NAME: &str = "@upstash/context7-mcp";
 const PACKAGE_VERSION: &str = "latest";
 const SERVER_PATH: &str = "node_modules/@upstash/context7-mcp/dist/index.js";
-const DEFAULT_MIN_TOKENS_ENV: &str = "DEFAULT_MINIMUM_TOKENS";
-
-struct Context7ModelContextExtension;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 struct Context7ModelContextExtensionSettings {
     #[serde(default)]
-    default_minimum_tokens: Option<String>,
+    context7_api_key: Option<String>,
 }
+
+struct Context7ModelContextExtension;
 
 impl zed::Extension for Context7ModelContextExtension {
     fn new() -> Self {
@@ -36,38 +35,35 @@ impl zed::Extension for Context7ModelContextExtension {
 
         let settings = ContextServerSettings::for_project("mcp-server-context7", project)?;
 
-        let ext_settings: Option<Context7ModelContextExtensionSettings> =
-            if let Some(settings_value) = settings.settings {
-                match serde_json::from_value(settings_value) {
-                    Ok(s) => Some(s),
-                    Err(e) => return Err(format!("Failed to parse settings: {}", e).into()),
-                }
-            } else {
-                None
-            };
+        let settings_struct: Context7ModelContextExtensionSettings = match settings.settings {
+            Some(v) => serde_json::from_value(v).map_err(|e| e.to_string())?,
+            None => Context7ModelContextExtensionSettings {
+                context7_api_key: None,
+            },
+        };
 
-        let mut env_vars = Vec::new();
+        let mut args = Vec::new();
+        args.push(
+            env::current_dir()
+                .unwrap()
+                .join(SERVER_PATH)
+                .to_string_lossy()
+                .to_string(),
+        );
 
-        if let Some(settings) = ext_settings {
-            if let Some(default_minimum_tokens) = settings.default_minimum_tokens {
-                env_vars.push((DEFAULT_MIN_TOKENS_ENV.to_string(), default_minimum_tokens));
-            }
+        if let Some(key) = settings_struct.context7_api_key {
+            args.push(format!("--api-key={}", key));
         }
 
         Ok(Command {
             command: zed::node_binary_path()?,
-            args: vec![env::current_dir()
-                .unwrap()
-                .join(SERVER_PATH)
-                .to_string_lossy()
-                .to_string()],
-            env: env_vars,
+            args,
+            env: Default::default(),
         })
     }
 
     fn context_server_configuration(
         &mut self,
-
         _context_server_id: &ContextServerId,
 
         project: &Project,
@@ -85,9 +81,19 @@ impl zed::Extension for Context7ModelContextExtension {
                 if let Ok(context7_settings) =
                     serde_json::from_value::<Context7ModelContextExtensionSettings>(settings_value)
                 {
-                    if let Some(default_minimum_tokens) = context7_settings.default_minimum_tokens {
-                        default_settings = default_settings
-                            .replace("\"10000\"", &format!("\"{}\"", default_minimum_tokens));
+                    match context7_settings.context7_api_key {
+                        Some(context7_api_key) => {
+                            default_settings = default_settings.replace(
+                                "\"YOUR_CONTEXT7_API_KEY\"",
+                                &format!("\"{}\"", context7_api_key),
+                            );
+                        }
+                        None => {
+                            // If no API key provided, replace the placeholder with null
+                            // so the default_settings won't contain an invalid placeholder key.
+                            default_settings =
+                                default_settings.replace("\"YOUR_CONTEXT7_API_KEY\"", "\"\"");
+                        }
                     }
                 }
             }
@@ -100,9 +106,7 @@ impl zed::Extension for Context7ModelContextExtension {
 
         Ok(Some(ContextServerConfiguration {
             installation_instructions,
-
             default_settings,
-
             settings_schema,
         }))
     }

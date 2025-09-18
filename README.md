@@ -53,7 +53,7 @@ If you're using Zed's agent mode, you need to enable this context server for you
 
 ## Environment Variables (Optional)
 
-- `DEFAULT_MINIMUM_TOKENS`: Set the minimum token count for documentation retrieval (default: 10000).
+- `context7_api_key`: Set the Context7 API key.
 
 Examples:
 
@@ -64,7 +64,7 @@ Examples:
       "source": "extension",
       "enabled": true,
       "settings": {
-        "default_minimum_tokens": "10000"
+        "context7_api_key": "YOUR_CONTEXT7_API_KEY",
       }
     }
   }
